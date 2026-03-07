@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -11,32 +11,32 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { CATEGORIES } from '../constants/categories';
-import { COLORS } from '../constants/colors';
-import { loadTransactions, saveTransactions } from '../utils/storage';
+} from "react-native";
+import { CATEGORIES } from "../src/constants/categories";
+import { COLORS } from "../src/constants/colors";
+import { loadTransactions, saveTransactions } from "../src/utils/storage";
 
 export default function AddTransactionScreen() {
   const router = useRouter();
-  const [type, setType] = useState('expense');
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
+  const [type, setType] = useState("expense");
+  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState("");
   const [category, setCategory] = useState(null);
 
   const handleSave = async () => {
     if (!amount || !description || !category) {
-      Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+      Alert.alert("Erreur", "Veuillez remplir tous les champs");
       return;
     }
 
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
-      Alert.alert('Erreur', 'Montant invalide');
+      Alert.alert("Erreur", "Montant invalide");
       return;
     }
 
     const transactions = await loadTransactions();
-    
+
     const newTransaction = {
       id: Date.now().toString(),
       type,
@@ -51,29 +51,31 @@ export default function AddTransactionScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.typeContainer}>
           <TouchableOpacity
             style={[
               styles.typeButton,
-              type === 'income' && styles.typeButtonActive,
-              { borderColor: COLORS.income }
+              type === "income" && styles.typeButtonActive,
+              { borderColor: COLORS.income },
             ]}
-            onPress={() => setType('income')}
+            onPress={() => setType("income")}
           >
-            <Ionicons 
-              name="arrow-down" 
-              size={24} 
-              color={type === 'income' ? COLORS.income : COLORS.textLight} 
+            <Ionicons
+              name="arrow-down"
+              size={24}
+              color={type === "income" ? COLORS.income : COLORS.textLight}
             />
-            <Text style={[
-              styles.typeText,
-              { color: type === 'income' ? COLORS.income : COLORS.textLight }
-            ]}>
+            <Text
+              style={[
+                styles.typeText,
+                { color: type === "income" ? COLORS.income : COLORS.textLight },
+              ]}
+            >
               Revenu
             </Text>
           </TouchableOpacity>
@@ -81,20 +83,24 @@ export default function AddTransactionScreen() {
           <TouchableOpacity
             style={[
               styles.typeButton,
-              type === 'expense' && styles.typeButtonActive,
-              { borderColor: COLORS.expense }
+              type === "expense" && styles.typeButtonActive,
+              { borderColor: COLORS.expense },
             ]}
-            onPress={() => setType('expense')}
+            onPress={() => setType("expense")}
           >
-            <Ionicons 
-              name="arrow-up" 
-              size={24} 
-              color={type === 'expense' ? COLORS.expense : COLORS.textLight} 
+            <Ionicons
+              name="arrow-up"
+              size={24}
+              color={type === "expense" ? COLORS.expense : COLORS.textLight}
             />
-            <Text style={[
-              styles.typeText,
-              { color: type === 'expense' ? COLORS.expense : COLORS.textLight }
-            ]}>
+            <Text
+              style={[
+                styles.typeText,
+                {
+                  color: type === "expense" ? COLORS.expense : COLORS.textLight,
+                },
+              ]}
+            >
               Dépense
             </Text>
           </TouchableOpacity>
@@ -126,14 +132,14 @@ export default function AddTransactionScreen() {
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Catégorie</Text>
           <View style={styles.categoriesGrid}>
-            {CATEGORIES.filter(c => 
-              type === 'income' ? c.id === 'salary' : c.id !== 'salary'
+            {CATEGORIES.filter((c) =>
+              type === "income" ? c.id === "salary" : c.id !== "salary",
             ).map((cat) => (
               <TouchableOpacity
                 key={cat.id}
                 style={[
                   styles.categoryItem,
-                  { backgroundColor: cat.color + '20' },
+                  { backgroundColor: cat.color + "20" },
                   category?.id === cat.id && styles.categoryItemActive,
                 ]}
                 onPress={() => setCategory(cat)}
@@ -162,15 +168,15 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   typeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 24,
   },
   typeButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 16,
     borderRadius: 12,
     borderWidth: 2,
@@ -183,7 +189,7 @@ const styles = StyleSheet.create({
   },
   typeText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 8,
   },
   inputContainer: {
@@ -191,7 +197,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     color: COLORS.text,
     marginBottom: 8,
   },
@@ -201,21 +207,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     fontSize: 16,
     color: COLORS.text,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 2,
   },
   categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   categoryItem: {
-    width: '48%',
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: "48%",
+    flexDirection: "row",
+    alignItems: "center",
     padding: 12,
     borderRadius: 12,
     marginBottom: 8,
@@ -226,22 +232,22 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     marginLeft: 8,
   },
   saveButton: {
     backgroundColor: COLORS.primary,
     padding: 18,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 20,
     marginBottom: 30,
   },
   saveButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
-});// À la fin du fichier
-export default AddTransactionScreen;
+}); // À la fin du fichier
+// export default AddTransactionScreen;
 // export default NomDuComposant;
