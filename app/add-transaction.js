@@ -16,12 +16,20 @@ import { CATEGORIES } from "../src/constants/categories";
 import { COLORS } from "../src/constants/colors";
 import { loadTransactions, saveTransactions } from "../src/utils/storage";
 
+// interface Category {
+//   id: string;
+//   name: string;
+//   icon: string;
+//   color: string;
+// }
+
 export default function AddTransactionScreen() {
   const router = useRouter();
   const [type, setType] = useState("expense");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState(null);
+  // const [category, setCategory] = useState(null);
+  const [category, setCategory] = useState | (null > null);
 
   const handleSave = async () => {
     if (!amount || !description || !category) {
