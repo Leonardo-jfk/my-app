@@ -308,6 +308,7 @@ export default function ExploreScreen() {
 
     const target = parseFloat(newDream.targetAmount);
     const current = parseFloat(newDream.currentAmount) || 0;
+    const monthly = parseFloat(newDream.monthlyContribution) || 0;
 
     if (isNaN(target) || target <= 0) {
       Alert.alert("Erreur", "Montant cible invalide");
@@ -379,6 +380,7 @@ export default function ExploreScreen() {
       monthlyContribution: monthly > 0 ? monthly : undefined, // ← AJOUTER
       targetDate: newGoal.targetDate || undefined, // ← AJOUTER
       createdAt: new Date().toISOString(),
+      monthlySavings: monthly,
     };
 
     saveGoals([...goals, goal]);
@@ -501,14 +503,217 @@ export default function ExploreScreen() {
   };
 
   // Calculer la projection d'un objectif
-  const calculateProjection = (goal: Goal) => {
-    if (!goal.monthlySavings || goal.monthlySavings <= 0) return null;
-    const remaining = goal.targetAmount - goal.currentAmount;
-    const monthsNeeded = Math.ceil(remaining / goal.monthlySavings);
+  // const calculateProjection = (goal: Goal) => {
+  //   if (!goal.monthlySavings || goal.monthlySavings <= 0) return null;
+  //   const remaining = goal.targetAmount - goal.currentAmount;
+  //   const monthsNeeded = Math.ceil(remaining / goal.monthlySavings);
+  //   const years = Math.floor(monthsNeeded / 12);
+  //   const months = monthsNeeded % 12;
+  //   return { years, months, monthsNeeded };
+  // };
+
+  const calculateProjection = (item: Dream | Goal, isDream: boolean) => {
+    const remaining = item.targetAmount - item.currentAmount;
+    if (remaining <= 0) return { achieved: true };
+
+    const monthly = isDream
+      ? (item as Dream).monthlyContribution
+      : (item as Goal).monthlyContribution || (item as Goal).monthlySavings;
+
+    if (!monthly || monthly <= 0) {
+      return {
+        needsMonthly: true,
+        monthlyNeeded: remaining / 12, // Par défaut sur 1 an
+      };
+    }
+
+    const monthsNeeded = Math.ceil(remaining / monthly);
     const years = Math.floor(monthsNeeded / 12);
     const months = monthsNeeded % 12;
-    return { years, months, monthsNeeded };
+
+    return {
+      years,
+      months,
+      monthsNeeded,
+      monthlyNeeded: monthly,
+      achieved: false,
+    };
   };
+
+  // Rendu d'un rêve
+  // const renderDream = ({ item }: { item: Dream }) => {
+  //   // const category = DREAM_CATEGORIES.find((c) => c.id === item.category) || DREAM_CATEGORIES[0];
+  //   // const progress = (item.currentAmount / item.targetAmount) * 100;
+  //   const projection = calculateProjection(item, true);
+  //   return (
+  //     <ThemedView style={styles.card}>
+  //       {/* <View style={styles.cardHeader}>
+  //         <View
+  //           style={[
+  //             styles.iconContainer,
+  //             { backgroundColor: category.color + "20" },
+  //           ]}
+  //         >
+  //           <Ionicons name={category.icon} size={24} color={category.color} />
+  //         </View>
+  //         <View style={styles.cardInfo}>
+  //           <ThemedText type="defaultSemiBold">{item.name}</ThemedText>
+  //           <ThemedText style={styles.categoryText}>{category.name}</ThemedText>
+  //         </View>
+  //         <TouchableOpacity onPress={() => handleDeleteDream(item.id)}>
+  //           <Ionicons name="trash-outline" size={20} color={COLORS.danger} />
+  //         </TouchableOpacity>
+  //       </View>
+
+  //       <View style={styles.progressContainer}>
+  //         <View style={styles.progressBar}>
+  //           <View
+  //             style={[
+  //               styles.progressFill,
+  //               { width: `${progress}%`, backgroundColor: category.color },
+  //             ]}
+  //           />
+  //         </View>
+  //         <ThemedText style={styles.progressText}>
+  //           {progress.toFixed(1)}%
+  //         </ThemedText>
+  //       </View>
+
+  //       <View style={styles.amountRow}>
+  //         <View>
+  //           <ThemedText style={styles.amountLabel}>Objectif</ThemedText>
+  //           <ThemedText type="defaultSemiBold">
+  //             {formatCurrency(item.targetAmount)}
+  //           </ThemedText>
+  //         </View>
+  //         <View>
+  //           <ThemedText style={styles.amountLabel}>Épargné</ThemedText>
+  //           <ThemedText
+  //             type="defaultSemiBold"
+  //             style={{ color: COLORS.success }}
+  //           >
+  //             {formatCurrency(item.currentAmount)}
+  //           </ThemedText>
+  //         </View>
+  //       </View>
+
+  //       <View style={styles.quickAdd}>
+  //         <ThemedText style={styles.quickAddLabel}>Ajouter :</ThemedText>
+  //         <View style={styles.quickAddButtons}>
+  //           {[10, 50, 100].map((amount) => (
+  //             <TouchableOpacity
+  //               key={amount}
+  //               style={[
+  //                 styles.quickAddButton,
+  //                 { backgroundColor: category.color + "20" },
+  //               ]}
+  //               onPress={() => addContribution(item, amount)}
+  //             >
+  //               <Text
+  //                 style={[styles.quickAddButtonText, { color: category.color }]}
+  //               >
+  //                 {amount}€
+  //               </Text>
+  //             </TouchableOpacity>
+  //           ))}
+  //         </View>
+  //       </View> */}
+
+  //       <View style={styles.monthlySection}>
+  //         <ThemedText style={styles.sectionLabel}>Épargne mensuelle</ThemedText>
+
+  //         {editingDreamId === item.id ? (
+  //           <View style={styles.monthlyEdit}>
+  //             <TextInput
+  //               style={styles.monthlyInput}
+  //               value={editMonthlyValue}
+  //               onChangeText={setEditMonthlyValue}
+  //               keyboardType="numeric"
+  //               placeholder="Montant"
+  //               placeholderTextColor={COLORS.textLight}
+  //               autoFocus
+  //             />
+  //             <TouchableOpacity
+  //               onPress={() =>
+  //                 updateMonthlyContribution(item, editMonthlyValue, true)
+  //               }
+  //               style={styles.monthlySaveButton}
+  //             >
+  //               <Ionicons name="checkmark" size={20} color="white" />
+  //             </TouchableOpacity>
+  //             <TouchableOpacity
+  //               onPress={() => setEditingDreamId(null)}
+  //               style={[
+  //                 styles.monthlySaveButton,
+  //                 { backgroundColor: COLORS.danger },
+  //               ]}
+  //             >
+  //               <Ionicons name="close" size={20} color="white" />
+  //             </TouchableOpacity>
+  //           </View>
+  //         ) : (
+  //           <TouchableOpacity
+  //             style={styles.monthlyDisplay}
+  //             onPress={() => {
+  //               setEditingDreamId(item.id);
+  //               setEditMonthlyValue(item.monthlyContribution?.toString() || "");
+  //             }}
+  //           >
+  //             <ThemedText style={styles.monthlyAmount}>
+  //               {item.monthlyContribution
+  //                 ? formatCurrency(item.monthlyContribution)
+  //                 : "—"}
+  //             </ThemedText>
+  //             <ThemedText style={styles.monthlyLabel}>/mois</ThemedText>
+  //             <Ionicons
+  //               name="pencil"
+  //               size={16}
+  //               color={COLORS.textLight}
+  //               style={styles.editIcon}
+  //             />
+  //           </TouchableOpacity>
+  //         )}
+  //       </View>
+
+  //       {/* Projection */}
+  //       {projection && !projection.achieved && (
+  //         <View style={styles.projectionCard}>
+  //           {projection.needsMonthly ? (
+  //             <View style={styles.projectionRow}>
+  //               <Ionicons name="bulb" size={16} color={COLORS.warning} />
+  //               <ThemedText style={styles.projectionText}>
+  //                 Définissez une épargne mensuelle pour voir la projection
+  //               </ThemedText>
+  //             </View>
+  //           ) : (
+  //             <>
+  //               <View style={styles.projectionRow}>
+  //                 <Ionicons
+  //                   name="calendar"
+  //                   size={16}
+  //                   color={COLORS.textLight}
+  //                 />
+  //                 <ThemedText style={styles.projectionText}>
+  //                   Objectif atteint dans{" "}
+  //                   {formatProjection(
+  //                     projection.years || 0,
+  //                     projection.months || 0,
+  //                   )}
+  //                 </ThemedText>
+  //               </View>
+  //               <View style={styles.projectionRow}>
+  //                 <Ionicons name="cash" size={16} color={COLORS.textLight} />
+  //                 <ThemedText style={styles.projectionText}>
+  //                   {formatCurrency(projection.monthlyNeeded || 0)}/mois
+  //                 </ThemedText>
+  //               </View>
+  //             </>
+  //           )}
+  //         </View>
+  //       )}
+  //     </ThemedView>
+  //   );
+  // };
 
   // Rendu d'un rêve
   const renderDream = ({ item }: { item: Dream }) => {
@@ -516,17 +721,24 @@ export default function ExploreScreen() {
       DREAM_CATEGORIES.find((c) => c.id === item.category) ||
       DREAM_CATEGORIES[0];
     const progress = (item.currentAmount / item.targetAmount) * 100;
+    const remaining = item.targetAmount - item.currentAmount;
     const projection = calculateProjection(item, true);
+
     return (
       <ThemedView style={styles.card}>
-        {/* <View style={styles.cardHeader}>
+        {/* CARD HEADER - Utilise handleDeleteDream */}
+        <View style={styles.cardHeader}>
           <View
             style={[
               styles.iconContainer,
               { backgroundColor: category.color + "20" },
             ]}
           >
-            <Ionicons name={category.icon} size={24} color={category.color} />
+            <Ionicons
+              name={category.icon as any}
+              size={24}
+              color={category.color}
+            />
           </View>
           <View style={styles.cardInfo}>
             <ThemedText type="defaultSemiBold">{item.name}</ThemedText>
@@ -537,6 +749,7 @@ export default function ExploreScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* PROGRESS BAR */}
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
             <View
@@ -551,6 +764,7 @@ export default function ExploreScreen() {
           </ThemedText>
         </View>
 
+        {/* AMOUNTS */}
         <View style={styles.amountRow}>
           <View>
             <ThemedText style={styles.amountLabel}>Objectif</ThemedText>
@@ -560,37 +774,52 @@ export default function ExploreScreen() {
           </View>
           <View>
             <ThemedText style={styles.amountLabel}>Épargné</ThemedText>
+            <ThemedText type="defaultSemiBold" style={{ color: COLORS.income }}>
+              {formatCurrency(item.currentAmount)}
+            </ThemedText>
+          </View>
+          <View>
+            <ThemedText style={styles.amountLabel}>Reste</ThemedText>
             <ThemedText
               type="defaultSemiBold"
-              style={{ color: COLORS.success }}
+              style={{ color: COLORS.warning }}
             >
-              {formatCurrency(item.currentAmount)}
+              {formatCurrency(remaining)}
             </ThemedText>
           </View>
         </View>
 
-        <View style={styles.quickAdd}>
-          <ThemedText style={styles.quickAddLabel}>Ajouter :</ThemedText>
-          <View style={styles.quickAddButtons}>
-            {[10, 50, 100].map((amount) => (
-              <TouchableOpacity
-                key={amount}
-                style={[
-                  styles.quickAddButton,
-                  { backgroundColor: category.color + "20" },
-                ]}
-                onPress={() => addContribution(item, amount)}
-              >
-                <Text
-                  style={[styles.quickAddButtonText, { color: category.color }]}
+        {/* QUICK ADD - Utilise addContribution */}
+        {remaining > 0 && (
+          <View style={styles.quickAdd}>
+            <ThemedText style={styles.quickAddLabel}>
+              Ajouter rapidement :
+            </ThemedText>
+            <View style={styles.quickAddButtons}>
+              {[10, 50, 100, Math.min(remaining, 500)].map((amount) => (
+                <TouchableOpacity
+                  key={amount}
+                  style={[
+                    styles.quickAddButton,
+                    { backgroundColor: category.color + "20" },
+                  ]}
+                  onPress={() => addContribution(item, amount)}
                 >
-                  {amount}€
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.quickAddButtonText,
+                      { color: category.color },
+                    ]}
+                  >
+                    {amount}€
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
-        </View> */}
+        )}
 
+        {/* MONTHLY CONTRIBUTION SECTION */}
         <View style={styles.monthlySection}>
           <ThemedText style={styles.sectionLabel}>Épargne mensuelle</ThemedText>
 
@@ -647,7 +876,7 @@ export default function ExploreScreen() {
           )}
         </View>
 
-        {/* Projection */}
+        {/* PROJECTION */}
         {projection && !projection.achieved && (
           <View style={styles.projectionCard}>
             {projection.needsMonthly ? (
@@ -688,22 +917,319 @@ export default function ExploreScreen() {
   };
 
   // Rendu d'un objectif
+  // const renderGoal = ({ item }: { item: Goal }) => {
+  //   // const goalType = GOAL_TYPES.find((g) => g.id === item.type) || GOAL_TYPES[0];
+  //   // const progress = (item.currentAmount / item.targetAmount) * 100;
+  //   const projection = calculateProjection(item, false);
+
+  //   return (
+  //     <ThemedView style={styles.card}>
+  //       {/* <View style={styles.cardHeader}>
+  //         <View
+  //           style={[
+  //             styles.iconContainer,
+  //             { backgroundColor: goalType.color + "20" },
+  //           ]}
+  //         >
+  //           <Ionicons name={goalType.icon} size={24} color={goalType.color} />
+  //         </View>
+  //         <View style={styles.cardInfo}>
+  //           <ThemedText type="defaultSemiBold">{item.title}</ThemedText>
+  //           <ThemedText style={styles.categoryText}>{goalType.name}</ThemedText>
+  //         </View>
+  //         <TouchableOpacity onPress={() => handleDeleteGoal(item.id)}>
+  //           <Ionicons name="trash-outline" size={20} color={COLORS.danger} />
+  //         </TouchableOpacity>
+  //       </View>
+
+  //       <View style={styles.progressContainer}>
+  //         <View style={styles.progressBar}>
+  //           <View
+  //             style={[
+  //               styles.progressFill,
+  //               { width: `${progress}%`, backgroundColor: goalType.color },
+  //             ]}
+  //           />
+  //         </View>
+  //         <ThemedText style={styles.progressText}>
+  //           {progress.toFixed(1)}%
+  //         </ThemedText>
+  //       </View>
+
+  //       <View style={styles.amountRow}>
+  //         <View>
+  //           <ThemedText style={styles.amountLabel}>Objectif</ThemedText>
+  //           <ThemedText type="defaultSemiBold">
+  //             {formatCurrency(item.targetAmount)}
+  //           </ThemedText>
+  //         </View>
+  //         <View>
+  //           <ThemedText style={styles.amountLabel}>Actuel</ThemedText>
+  //           <ThemedText
+  //             type="defaultSemiBold"
+  //             style={{ color: COLORS.success }}
+  //           >
+  //             {formatCurrency(item.currentAmount)}
+  //           </ThemedText>
+  //         </View>
+  //       </View>
+
+  //       {projection && (
+  //         <ThemedView style={styles.projectionCard}>
+  //           <View style={styles.projectionRow}>
+  //             <Ionicons name="calendar" size={16} color={COLORS.textLight} />
+  //             <ThemedText style={styles.projectionText}>
+  //               {projection.years > 0 ? `${projection.years} an(s) ` : ""}
+  //               {projection.months > 0 ? `${projection.months} mois` : ""}
+  //               {projection.monthsNeeded === 0 ? "Objectif atteint !" : ""}
+  //             </ThemedText>
+  //           </View>
+  //           <View style={styles.projectionRow}>
+  //             <Ionicons name="cash" size={16} color={COLORS.textLight} />
+  //             <ThemedText style={styles.projectionText}>
+  //               {formatCurrency(item.monthlySavings)}/mois
+  //             </ThemedText>
+  //           </View>
+  //         </ThemedView>
+  //       )} */}
+
+  //       <View style={styles.monthlySection}>
+  //         <ThemedText style={styles.sectionLabel}>Épargne mensuelle</ThemedText>
+
+  //         {editingGoalId === item.id ? (
+  //           <View style={styles.monthlyEdit}>
+  //             <TextInput
+  //               style={styles.monthlyInput}
+  //               value={editMonthlyValue}
+  //               onChangeText={setEditMonthlyValue}
+  //               keyboardType="numeric"
+  //               placeholder="Montant"
+  //               placeholderTextColor={COLORS.textLight}
+  //               autoFocus
+  //             />
+  //             <TouchableOpacity
+  //               onPress={() =>
+  //                 updateMonthlyContribution(item, editMonthlyValue, true)
+  //               }
+  //               style={styles.monthlySaveButton}
+  //             >
+  //               <Ionicons name="checkmark" size={20} color="white" />
+  //             </TouchableOpacity>
+  //             <TouchableOpacity
+  //               onPress={() => setEditingDreamId(null)}
+  //               style={[
+  //                 styles.monthlySaveButton,
+  //                 { backgroundColor: COLORS.danger },
+  //               ]}
+  //             >
+  //               <Ionicons name="close" size={20} color="white" />
+  //             </TouchableOpacity>
+  //           </View>
+  //         ) : (
+  //           <TouchableOpacity
+  //             style={styles.monthlyDisplay}
+  //             onPress={() => {
+  //               setEditingDreamId(item.id);
+  //               setEditMonthlyValue(item.monthlyContribution?.toString() || "");
+  //             }}
+  //           >
+  //             <ThemedText style={styles.monthlyAmount}>
+  //               {item.monthlyContribution
+  //                 ? formatCurrency(item.monthlyContribution)
+  //                 : "—"}
+  //             </ThemedText>
+  //             <ThemedText style={styles.monthlyLabel}>/mois</ThemedText>
+  //             <Ionicons
+  //               name="pencil"
+  //               size={16}
+  //               color={COLORS.textLight}
+  //               style={styles.editIcon}
+  //             />
+  //           </TouchableOpacity>
+  //         )}
+  //       </View>
+
+  //       {/* Projection */}
+  //       {projection && !projection.achieved && (
+  //         <View style={styles.projectionCard}>
+  //           {projection.needsMonthly ? (
+  //             <View style={styles.projectionRow}>
+  //               <Ionicons name="bulb" size={16} color={COLORS.warning} />
+  //               <ThemedText style={styles.projectionText}>
+  //                 Définissez une épargne mensuelle pour voir la projection
+  //               </ThemedText>
+  //             </View>
+  //           ) : (
+  //             <>
+  //               <View style={styles.projectionRow}>
+  //                 <Ionicons
+  //                   name="calendar"
+  //                   size={16}
+  //                   color={COLORS.textLight}
+  //                 />
+  //                 <ThemedText style={styles.projectionText}>
+  //                   Objectif atteint dans{" "}
+  //                   {formatProjection(
+  //                     projection.years || 0,
+  //                     projection.months || 0,
+  //                   )}
+  //                 </ThemedText>
+  //               </View>
+  //               <View style={styles.projectionRow}>
+  //                 <Ionicons name="cash" size={16} color={COLORS.textLight} />
+  //                 <ThemedText style={styles.projectionText}>
+  //                   {formatCurrency(projection.monthlyNeeded || 0)}/mois
+  //                 </ThemedText>
+  //               </View>
+  //             </>
+  //           )}
+  //         </View>
+  //       )}
+  //     </ThemedView>
+  //   );
+  // };
+
+  //   const renderGoal = ({ item }: { item: Goal }) => {
+  //   const goalType = GOAL_TYPES.find((g) => g.id === item.type) || GOAL_TYPES[0];
+  //   const progress = (item.currentAmount / item.targetAmount) * 100;
+  //   const projection = calculateProjection(item, false);
+
+  //   return (
+  //     <ThemedView style={styles.card}>
+  //       {/* DÉCOMMENTEZ CE BLOC - IL UTILISE handleDeleteGoal */}
+  //       <View style={styles.cardHeader}>
+  //         <View style={[styles.iconContainer, { backgroundColor: goalType.color + "20" }]}>
+  //           <Ionicons name={goalType.icon as any} size={24} color={goalType.color} />
+  //         </View>
+  //         <View style={styles.cardInfo}>
+  //           <ThemedText type="defaultSemiBold">{item.title}</ThemedText>
+  //           <ThemedText style={styles.categoryText}>{goalType.name}</ThemedText>
+  //         </View>
+  //         <TouchableOpacity onPress={() => handleDeleteGoal(item.id)}>   {/* ← ICI */}
+  //           <Ionicons name="trash-outline" size={20} color={COLORS.danger} />
+  //         </TouchableOpacity>
+  //       </View>
+
+  //       <View style={styles.progressContainer}>
+  //         <View style={styles.progressBar}>
+  //           <View style={[styles.progressFill, { width: `${progress}%`, backgroundColor: goalType.color }]} />
+  //         </View>
+  //         <ThemedText style={styles.progressText}>{progress.toFixed(1)}%</ThemedText>
+  //       </View>
+
+  //       <View style={styles.amountRow}>
+  //         <View>
+  //           <ThemedText style={styles.amountLabel}>Objectif</ThemedText>
+  //           <ThemedText type="defaultSemiBold">{formatCurrency(item.targetAmount)}</ThemedText>
+  //         </View>
+  //         <View>
+  //           <ThemedText style={styles.amountLabel}>Actuel</ThemedText>
+  //           <ThemedText type="defaultSemiBold" style={{ color: COLORS.income }}>
+  //             {formatCurrency(item.currentAmount)}
+  //           </ThemedText>
+  //         </View>
+  //       </View>
+
+  //       {/* Le reste du code (monthlySection, projection) reste comme c'est */}
+  //       <View style={styles.monthlySection}>
+  //         {/* ... */}
+
+  //              {/* <View style={styles.monthlyEdit}> */}
+  //                <TextInput
+  //                 style={styles.monthlyInput}
+  //                 value={editMonthlyValue}
+  //                 onChangeText={setEditMonthlyValue}
+  //                 keyboardType="numeric"
+  //                 placeholder="Montant"
+  //                 placeholderTextColor={COLORS.textLight}
+  //                 autoFocus
+  //               />
+  //               <TouchableOpacity
+  //                 onPress={() =>
+  //                   updateMonthlyContribution(item, editMonthlyValue, true)
+  //                 }
+  //                 style={styles.monthlySaveButton}
+  //               >
+  //                 <Ionicons name="checkmark" size={20} color="white" />
+  //               </TouchableOpacity>
+  //               <TouchableOpacity
+  //                 onPress={() => setEditingDreamId(null)}
+  //                 style={[
+  //                   styles.monthlySaveButton,
+  //                   { backgroundColor: COLORS.danger },
+  //                 ]}
+  //               >
+  //                 <Ionicons name="close" size={20} color="white" />
+  //               </TouchableOpacity>
+  //             {/* </View> */}
+
+  //       </View>
+
+  //       {projection && !projection.achieved && (
+  //         <View style={styles.projectionCard}>
+  //           {/* ... */}
+
+  //           {/* <View style={styles.projectionCard}> */}
+  //              {projection.needsMonthly ? (
+  //               <View style={styles.projectionRow}>
+  //                 <Ionicons name="bulb" size={16} color={COLORS.warning} />
+  //                 <ThemedText style={styles.projectionText}>
+  //                   Définissez une épargne mensuelle pour voir la projection
+  //                 </ThemedText>
+  //               </View>
+  //             ) : (
+  //               <>
+  //                 <View style={styles.projectionRow}>
+  //                   <Ionicons
+  //                     name="calendar"
+  //                     size={16}
+  //                     color={COLORS.textLight}
+  //                   />
+  //                   <ThemedText style={styles.projectionText}>
+  //                     Objectif atteint dans{" "}
+  //                     {formatProjection(
+  //                       projection.years || 0,
+  //                       projection.months || 0,
+  //                     )}
+  //                   </ThemedText>
+  //                 </View>
+  //                 <View style={styles.projectionRow}>
+  //                   <Ionicons name="cash" size={16} color={COLORS.textLight} />
+  //                   <ThemedText style={styles.projectionText}>
+  //                     {formatCurrency(projection.monthlyNeeded || 0)}/mois
+  //                   </ThemedText>
+  //                 </View>
+  //               </>
+  //             )}
+  //         </View>
+  //       )}
+  //     </ThemedView>
+  //   );
+  // };
+
+  // Rendu d'un objectif
   const renderGoal = ({ item }: { item: Goal }) => {
     const goalType =
       GOAL_TYPES.find((g) => g.id === item.type) || GOAL_TYPES[0];
     const progress = (item.currentAmount / item.targetAmount) * 100;
-    const projection = calculateProjection(item);
+    const remaining = item.targetAmount - item.currentAmount;
+    const projection = calculateProjection(item, false);
 
     return (
       <ThemedView style={styles.card}>
-        {/* <View style={styles.cardHeader}>
+        {/* CARD HEADER - Utilise handleDeleteGoal */}
+        <View style={styles.cardHeader}>
           <View
             style={[
               styles.iconContainer,
               { backgroundColor: goalType.color + "20" },
             ]}
           >
-            <Ionicons name={goalType.icon} size={24} color={goalType.color} />
+            <Ionicons
+              name={goalType.icon as any}
+              size={24}
+              color={goalType.color}
+            />
           </View>
           <View style={styles.cardInfo}>
             <ThemedText type="defaultSemiBold">{item.title}</ThemedText>
@@ -714,6 +1240,7 @@ export default function ExploreScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* PROGRESS BAR */}
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
             <View
@@ -728,6 +1255,7 @@ export default function ExploreScreen() {
           </ThemedText>
         </View>
 
+        {/* AMOUNTS */}
         <View style={styles.amountRow}>
           <View>
             <ThemedText style={styles.amountLabel}>Objectif</ThemedText>
@@ -737,34 +1265,22 @@ export default function ExploreScreen() {
           </View>
           <View>
             <ThemedText style={styles.amountLabel}>Actuel</ThemedText>
+            <ThemedText type="defaultSemiBold" style={{ color: COLORS.income }}>
+              {formatCurrency(item.currentAmount)}
+            </ThemedText>
+          </View>
+          <View>
+            <ThemedText style={styles.amountLabel}>Reste</ThemedText>
             <ThemedText
               type="defaultSemiBold"
-              style={{ color: COLORS.success }}
+              style={{ color: COLORS.warning }}
             >
-              {formatCurrency(item.currentAmount)}
+              {formatCurrency(remaining)}
             </ThemedText>
           </View>
         </View>
 
-        {projection && (
-          <ThemedView style={styles.projectionCard}>
-            <View style={styles.projectionRow}>
-              <Ionicons name="calendar" size={16} color={COLORS.textLight} />
-              <ThemedText style={styles.projectionText}>
-                {projection.years > 0 ? `${projection.years} an(s) ` : ""}
-                {projection.months > 0 ? `${projection.months} mois` : ""}
-                {projection.monthsNeeded === 0 ? "Objectif atteint !" : ""}
-              </ThemedText>
-            </View>
-            <View style={styles.projectionRow}>
-              <Ionicons name="cash" size={16} color={COLORS.textLight} />
-              <ThemedText style={styles.projectionText}>
-                {formatCurrency(item.monthlySavings)}/mois
-              </ThemedText>
-            </View>
-          </ThemedView>
-        )} */}
-
+        {/* MONTHLY CONTRIBUTION SECTION */}
         <View style={styles.monthlySection}>
           <ThemedText style={styles.sectionLabel}>Épargne mensuelle</ThemedText>
 
@@ -781,14 +1297,14 @@ export default function ExploreScreen() {
               />
               <TouchableOpacity
                 onPress={() =>
-                  updateMonthlyContribution(item, editMonthlyValue, true)
+                  updateMonthlyContribution(item, editMonthlyValue, false)
                 }
                 style={styles.monthlySaveButton}
               >
                 <Ionicons name="checkmark" size={20} color="white" />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => setEditingDreamId(null)}
+                onPress={() => setEditingGoalId(null)}
                 style={[
                   styles.monthlySaveButton,
                   { backgroundColor: COLORS.danger },
@@ -801,7 +1317,7 @@ export default function ExploreScreen() {
             <TouchableOpacity
               style={styles.monthlyDisplay}
               onPress={() => {
-                setEditingDreamId(item.id);
+                setEditingGoalId(item.id);
                 setEditMonthlyValue(item.monthlyContribution?.toString() || "");
               }}
             >
@@ -821,7 +1337,7 @@ export default function ExploreScreen() {
           )}
         </View>
 
-        {/* Projection */}
+        {/* PROJECTION */}
         {projection && !projection.achieved && (
           <View style={styles.projectionCard}>
             {projection.needsMonthly ? (
@@ -1585,21 +2101,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 8,
   },
-  projectionCard: {
-    marginTop: 8,
-    marginBottom: 12,
-    padding: 12,
-    backgroundColor: "rgba(0,0,0,0.02)",
-    borderRadius: 8,
-  },
-  projectionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  projectionText: {
-    fontSize: 13,
-    marginLeft: 6,
-    flex: 1,
-  },
+  // projectionCard: {
+  //   marginTop: 8,
+  //   marginBottom: 12,
+  //   padding: 12,
+  //   backgroundColor: "rgba(0,0,0,0.02)",
+  //   borderRadius: 8,
+  // },
+  // projectionRow: {
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   marginBottom: 4,
+  // },
+  // projectionText: {
+  //   fontSize: 13,
+  //   marginLeft: 6,
+  //   flex: 1,
+  // },
 });
