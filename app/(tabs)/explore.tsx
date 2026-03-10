@@ -502,6 +502,24 @@ export default function ExploreScreen() {
     saveDreams(updatedDreams);
   };
 
+  // Contribution rapide à un objectif
+  const addContributionToGoal = (goal: Goal, amount: number) => {
+    const newAmount = goal.currentAmount + amount;
+    if (newAmount >= goal.targetAmount) {
+      Alert.alert(
+        "Félicitations ! 🎉",
+        `Vous avez atteint votre objectif "${goal.title}" !`,
+      );
+    }
+
+    const updatedGoals = goals.map((g) =>
+      g.id === goal.id
+        ? { ...g, currentAmount: Math.min(newAmount, g.targetAmount) }
+        : g,
+    );
+    saveGoals(updatedGoals);
+  };
+
   // Calculer la projection d'un objectif
   // const calculateProjection = (goal: Goal) => {
   //   if (!goal.monthlySavings || goal.monthlySavings <= 0) return null;
@@ -1279,6 +1297,36 @@ export default function ExploreScreen() {
             </ThemedText>
           </View>
         </View>
+
+        {/* QUICK ADD - Utilise addContributionToGoal */}
+        {remaining > 0 && (
+          <View style={styles.quickAdd}>
+            <ThemedText style={styles.quickAddLabel}>
+              Ajouter rapidement :
+            </ThemedText>
+            <View style={styles.quickAddButtons}>
+              {[10, 50, 100, Math.min(remaining, 500)].map((amount) => (
+                <TouchableOpacity
+                  key={amount}
+                  style={[
+                    styles.quickAddButton,
+                    { backgroundColor: goalType.color + "20" },
+                  ]}
+                  onPress={() => addContributionToGoal(item, amount)}
+                >
+                  <Text
+                    style={[
+                      styles.quickAddButtonText,
+                      { color: goalType.color },
+                    ]}
+                  >
+                    {amount}€
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
 
         {/* MONTHLY CONTRIBUTION SECTION */}
         <View style={styles.monthlySection}>
