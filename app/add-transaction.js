@@ -65,6 +65,14 @@ export default function AddTransactionScreen() {
     >
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.typeContainer}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Transactions</Text>
+            <View style={{ width: 24 }} />
+          </View>
+
           <TouchableOpacity
             style={[
               styles.typeButton,

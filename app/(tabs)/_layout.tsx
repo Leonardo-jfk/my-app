@@ -22,7 +22,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <IconSymbol size={28} name="ipod" color={color} />
           ),
         }}
       />
@@ -30,9 +30,8 @@ export default function TabLayout() {
         name="transView"
         options={{
           title: "Transactions",
-          // title: "Goals",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <IconSymbol size={28} name="signature.ja" color={color} />
           ),
         }}
       />
@@ -41,7 +40,7 @@ export default function TabLayout() {
         options={{
           title: "Goals",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <IconSymbol size={28} name="binoculars" color={color} />
           ),
         }}
       />
