@@ -1234,8 +1234,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-  Alert,
-  FlatList,
   Modal,
   StyleSheet,
   Text,
@@ -1243,27 +1241,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import TransactionCard from "../../src/components/TransactionCard";
 import { COLORS } from "../../src/constants/colors";
 import { useMonthlyStats } from "../../src/hooks/useMonthlyStats";
 import { Dream, Goal, STORAGE_KEYS } from "../../src/types/finance-types";
-import {
-  calculateTotals,
-  filterTransactionsByMonth,
-} from "../../src/utils/calculations";
 import { formatCurrency } from "../../src/utils/formatters";
-import { loadTransactions, saveTransactions } from "../../src/utils/storage";
 // import SummaryCard from "../../src/components/SummaryCard";
 
 // Types
-interface Transaction {
-  id: string;
-  type: "income" | "expense";
-  amount: number;
-  description: string;
-  category: string;
-  date: string;
-}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -1273,8 +1257,6 @@ export default function HomeScreen() {
   const [goals, setGoals] = useState<Goal[]>([]);
 
   // États pour les transactions
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
   // const [refreshing, setRefreshing] = useState(false);
 
   // États pour les revenus/dépenses
@@ -1296,8 +1278,6 @@ export default function HomeScreen() {
       setGoals(goalsData ? JSON.parse(goalsData) : []);
 
       // Charger transactions
-      const transactionsData = await loadTransactions();
-      setTransactions(transactionsData);
     } catch (error) {
       console.error("Erreur chargement:", error);
     }
@@ -1311,14 +1291,6 @@ export default function HomeScreen() {
 
   // Stats mensuelles des rêves/objectifs
   const stats = useMonthlyStats(dreams, goals, monthlyIncome, monthlyExpenses);
-
-  // Stats des transactions du mois
-  const monthlyTransactions = filterTransactionsByMonth(
-    transactions,
-    currentMonth,
-  );
-  const { totalIncome: transactionIncome, totalExpenses: transactionExpenses } =
-    calculateTotals(monthlyTransactions);
 
   // Totaux combinés
   const totalDreamsCurrent = dreams.reduce(
@@ -1345,32 +1317,6 @@ export default function HomeScreen() {
       setMonthlyExpenses(value);
     }
     setShowIncomeModal(false);
-  };
-
-  // Gestion des transactions
-  const handleDeleteTransaction = (id: string) => {
-    Alert.alert("Supprimer", "Voulez-vous supprimer cette transaction ?", [
-      { text: "Annuler", style: "cancel" },
-      {
-        text: "Supprimer",
-        style: "destructive",
-        onPress: async () => {
-          const newTransactions = transactions.filter((t) => t.id !== id);
-          setTransactions(newTransactions);
-          await saveTransactions(newTransactions);
-        },
-      },
-    ]);
-  };
-
-  const changeMonth = (increment: number) => {
-    const newDate = new Date(currentMonth);
-    newDate.setMonth(currentMonth.getMonth() + increment);
-    setCurrentMonth(newDate);
-  };
-
-  const formatMonthYear = (date: Date) => {
-    return date.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
   };
 
   return (
@@ -1591,102 +1537,6 @@ export default function HomeScreen() {
           </Text>
         </View>
       </ThemedView>
-
-      {/* Section Transactions */}
-      <ThemedView style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle}>Transactions du mois</Text>
-          <TouchableOpacity onPress={() => router.push("/transactions")}>
-            <Text style={styles.seeAll}>Voir tout</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Navigation mois */}
-        <View style={styles.monthNavigator}>
-          <TouchableOpacity onPress={() => changeMonth(-1)}>
-            <Ionicons name="chevron-back" size={20} color={COLORS.text} />
-          </TouchableOpacity>
-          <Text style={styles.monthText}>{formatMonthYear(currentMonth)}</Text>
-          <TouchableOpacity onPress={() => changeMonth(1)}>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.text} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Résumé des transactions du mois */}
-        <View style={styles.transactionSummary}>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Revenus</Text>
-            <Text style={[styles.summaryValue, { color: COLORS.income }]}>
-              {formatCurrency(transactionIncome)}
-            </Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Dépenses</Text>
-            <Text style={[styles.summaryValue, { color: COLORS.expense }]}>
-              {formatCurrency(transactionExpenses)}
-            </Text>
-          </View>
-        </View>
-
-        {/* Liste des 3 dernières transactions */}
-        <FlatList
-          data={monthlyTransactions.slice(0, 3)}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TransactionCard
-              transaction={item}
-              onDelete={() => handleDeleteTransaction(item.id)}
-              onPress={() =>
-                router.push({
-                  pathname: "/transaction-details",
-                  params: { transaction: JSON.stringify(item) },
-                })
-              }
-            />
-          )}
-          scrollEnabled={false}
-          ListEmptyComponent={
-            <Text style={styles.emptyTransactions}>
-              Aucune transaction ce mois-ci
-            </Text>
-          }
-        />
-
-        <TouchableOpacity
-          style={styles.addTransactionButton}
-          onPress={() => router.push("/add-transaction")}
-        >
-          <Ionicons name="add-circle" size={20} color={COLORS.primary} />
-          <Text style={styles.addTransactionText}>Ajouter une transaction</Text>
-        </TouchableOpacity>
-      </ThemedView>
-
-      {/* Boutons rapides */}
-      <View style={styles.quickActions}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => router.push("/(tabs)/explore?tab=dreams")}
-        >
-          <Ionicons name="heart" size={24} color={COLORS.primary} />
-          <Text style={styles.actionText}>Rêves</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => router.push("/(tabs)/explore?tab=goals")}
-        >
-          <Ionicons name="flag" size={24} color={COLORS.primary} />
-          <Text style={styles.actionText}>Objectifs</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => router.push("/add-transaction")}
-        >
-          <Ionicons name="swap-horizontal" size={24} color={COLORS.primary} />
-          <Text style={styles.actionText}>Transaction</Text>
-        </TouchableOpacity>
-      </View>
     </ParallaxScrollView>
   );
 }
