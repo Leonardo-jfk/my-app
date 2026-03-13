@@ -26,8 +26,8 @@ export default function BackgroundImage({
   return (
     <ImageBackground
       source={backgroundImage}
-      style={[styles.container, style]}
-      imageStyle={[styles.image, { opacity }]}
+      style={[styles.container, style, { borderWidth: 2, borderColor: "red" }]}
+      imageStyle={{ opacity }}
       blurRadius={blurRadius}
     >
       {children}
@@ -39,8 +39,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  image: {
-    flex: 1,
-    resizeMode: "cover",
-  },
+  // image: {
+  //   flex: 1,
+  //   resizeMode: "cover",
+  // },
 });
