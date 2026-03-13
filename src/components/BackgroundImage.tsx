@@ -13,8 +13,8 @@ interface BackgroundImageProps {
 export default function BackgroundImage({
   children,
   style,
-  opacity = 0.5,
-  blurRadius = 0,
+  opacity = 0.1,
+  blurRadius = 0.1,
 }: BackgroundImageProps) {
   const colorScheme = useColorScheme();
 
@@ -26,7 +26,11 @@ export default function BackgroundImage({
   return (
     <ImageBackground
       source={backgroundImage}
-      style={[styles.container, style, { borderWidth: 2, borderColor: "red" }]}
+      style={[
+        styles.container,
+        style,
+        { borderWidth: 20, borderColor: "red", opacity: 0.1 },
+      ]}
       imageStyle={{ opacity }}
       blurRadius={blurRadius}
     >
