@@ -96,7 +96,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <BackgroundImage opacity={0.3} blurRadius={2}>
+    <BackgroundImage opacity={0.6} blurRadius={2}>
       <ScrollView style={styles.scrollView}>
         <ThemedView style={styles.titleContainer}>
           <ThemedText type="title">📊 Résumé du Mois</ThemedText>
@@ -121,9 +121,6 @@ export default function HomeScreen() {
               <Text style={styles.statLabel}>Revenus</Text>
               <Text style={[styles.statValue, { color: COLORS.income }]}>
                 {formatCurrency(monthlyIncome)}
-                <ThemedText forceOpaque={false}>
-                  Texte avec transparence possible
-                </ThemedText>
               </Text>
             </TouchableOpacity>
 
@@ -167,8 +164,8 @@ export default function HomeScreen() {
           animationType="slide"
           onRequestClose={() => setShowIncomeModal(false)}
         >
-          <View style={styles.modalOverlay}>
-            <ThemedView style={styles.modalContent}>
+          <IslandCard>
+            <View style={styles.modalOverlay}>
               <Text style={styles.modalTitle}>Modifier les montants</Text>
 
               <Text style={styles.modalLabel}>Revenus mensuels</Text>
@@ -210,12 +207,12 @@ export default function HomeScreen() {
                   </Text>
                 </TouchableOpacity>
               </View>
-            </ThemedView>
-          </View>
+            </View>
+          </IslandCard>
         </Modal>
 
         {/* Contributions aux projets */}
-        <ThemedView style={styles.card}>
+        <IslandCard>
           <Text style={styles.cardTitle}>Contributions mensuelles</Text>
 
           <View style={styles.row}>
@@ -244,10 +241,10 @@ export default function HomeScreen() {
               {formatCurrency(stats.monthlyContributions.total)}
             </Text>
           </View>
-        </ThemedView>
+        </IslandCard>
 
         {/* Progression des projets */}
-        <ThemedView style={styles.card}>
+        <IslandCard>
           <Text style={styles.cardTitle}>Progression des projets</Text>
 
           <TouchableOpacity
@@ -310,7 +307,7 @@ export default function HomeScreen() {
               {stats.progress.overall.toFixed(1)}%
             </Text>
           </View>
-        </ThemedView>
+        </IslandCard>
       </ScrollView>
     </BackgroundImage>
   );
