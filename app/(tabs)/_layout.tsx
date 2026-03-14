@@ -36,11 +36,29 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="goalView"
         options={{
           title: "Goals",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="binoculars" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="wisdomView"
+        options={{
+          title: "Wisdom",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="sparkles" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="systemView"
+        options={{
+          title: "System",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="wand.and.outline" color={color} />
           ),
         }}
       />

@@ -249,7 +249,7 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             style={styles.projectRow}
-            onPress={() => router.push("/(tabs)/explore?tab=dreams")}
+            onPress={() => router.push("/(tabs)/goalView?tab=dreams")}
           >
             <View style={styles.projectHeader}>
               <Ionicons name="heart" size={20} color="#EC4899" />
@@ -276,7 +276,7 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             style={styles.projectRow}
-            onPress={() => router.push("/(tabs)/explore?tab=goals")}
+            onPress={() => router.push("/(tabs)/goalView?tab=goals")}
           >
             <View style={styles.projectHeader}>
               <Ionicons name="flag" size={20} color="#8B5CF6" />

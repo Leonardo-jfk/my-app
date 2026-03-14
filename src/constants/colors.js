@@ -6,7 +6,7 @@ export const COLORS = {
   background: "#F9FAFB",
   surface: "#FFFFFF",
   text: "#1F2937",
-  textLight: "#6B7280",
+  textLight: "#bbc7e0ff",
   income: "#10B981",
   expense: "#EF4444",
   savings: "#6366F1",
