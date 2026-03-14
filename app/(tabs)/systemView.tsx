@@ -55,7 +55,11 @@ export default function SystemView() {
 
   if (isLoading) {
     return (
-      <BackgroundImage opacity={0.6} blurRadius={2}>
+      <BackgroundImage
+        key={`bg-loading-${forceUpdate}`}
+        opacity={0.9}
+        blurRadius={2}
+      >
         <View style={styles.loadingContainer}>
           <Text style={[styles.loadingText, { color: colors.text }]}>
             Chargement...
@@ -66,7 +70,11 @@ export default function SystemView() {
   }
 
   return (
-    <BackgroundImage opacity={0.6} blurRadius={2}>
+    <BackgroundImage
+      key={`bg-loading-${forceUpdate}`}
+      opacity={0.9}
+      blurRadius={2}
+    >
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Apparence */}
         <IslandCard key={`preferences-${forceUpdate}`}>
