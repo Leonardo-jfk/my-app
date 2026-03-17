@@ -635,8 +635,8 @@ import { formatCurrency } from "../../src/utils/formatters";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { colors, isLoading } = useAppTheme(); // ← Plus de toggleTheme ici
-  // const [forceUpdate, setForceUpdate] = useState(0);
+  const { colors, isLoading, theme } = useAppTheme(); // ← Plus de toggleTheme ici
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   // États pour les rêves et objectifs
   const [dreams, setDreams] = useState<Dream[]>([]);
@@ -706,14 +706,14 @@ export default function HomeScreen() {
   };
 
   // Mettre à jour forceUpdate quand le thème change
-  // React.useEffect(() => {
-  //   setForceUpdate((prev) => prev + 1);
-  // }, [theme]);
+  React.useEffect(() => {
+    setForceUpdate((prev) => prev + 1);
+  }, [theme]);
 
   if (isLoading) {
     return (
       <BackgroundImage
-        // key={`bg-loading-${forceUpdate}`}
+        key={`bg-loading-${forceUpdate}`}
         opacity={0.6}
         blurRadius={2}
       >

@@ -19,11 +19,11 @@ export default function SystemView() {
   const [notifications, setNotifications] = useState(true);
   const [biometric, setBiometric] = useState(false);
   const [currency, setCurrency] = useState("EUR");
-  const [forceUpdate, setForceUpdate] = useState(0);
+  // const [forceUpdate, setForceUpdate] = useState(0);
 
   const handleToggleTheme = () => {
     toggleTheme();
-    setForceUpdate((prev) => prev + 1); // Force le re-rendu
+    // setForceUpdate((prev) => prev + 1); // Force le re-rendu
   };
 
   const clearAllData = () => {
@@ -56,7 +56,7 @@ export default function SystemView() {
   if (isLoading) {
     return (
       <BackgroundImage
-        key={`bg-loading-${forceUpdate}`}
+        // key={`bg-loading-${forceUpdate}`}
         opacity={0.9}
         blurRadius={2}
       >
@@ -71,13 +71,13 @@ export default function SystemView() {
 
   return (
     <BackgroundImage
-      key={`bg-loading-${forceUpdate}`}
+      // key={`bg-loading-${forceUpdate}`}
       opacity={0.9}
       blurRadius={2}
     >
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Apparence */}
-        <IslandCard key={`preferences-${forceUpdate}`}>
+        <IslandCard>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
             <Ionicons name="color-palette" size={20} color={colors.text} />{" "}
             Apparence
@@ -110,7 +110,7 @@ export default function SystemView() {
         </IslandCard>
 
         {/* Préférences */}
-        <IslandCard key={`preferences-${forceUpdate}`}>
+        <IslandCard>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
             <Ionicons name="settings" size={20} color={colors.text} />{" "}
             Préférences
@@ -185,7 +185,7 @@ export default function SystemView() {
         </IslandCard>
 
         {/* Informations */}
-        <IslandCard key={`preferences-${forceUpdate}`}>
+        <IslandCard>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
             <Ionicons name="information-circle" size={20} color={colors.text} />{" "}
             Informations
@@ -226,7 +226,7 @@ export default function SystemView() {
         </IslandCard>
 
         {/* Actions */}
-        <IslandCard key={`preferences-${forceUpdate}`}>
+        <IslandCard>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
             <Ionicons name="warning" size={20} color={colors.text} /> Actions
           </Text>
