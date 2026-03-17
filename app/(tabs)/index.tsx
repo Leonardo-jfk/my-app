@@ -635,8 +635,8 @@ import { formatCurrency } from "../../src/utils/formatters";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { theme, colors, isLoading, toggleTheme } = useAppTheme();
-  const [forceUpdate, setForceUpdate] = useState(0);
+  const { colors, isLoading } = useAppTheme(); // ← Plus de toggleTheme ici
+  // const [forceUpdate, setForceUpdate] = useState(0);
 
   // États pour les rêves et objectifs
   const [dreams, setDreams] = useState<Dream[]>([]);
@@ -705,16 +705,15 @@ export default function HomeScreen() {
     setShowIncomeModal(false);
   };
 
-  // Fonction pour changer le thème
-  const handleToggleTheme = () => {
-    toggleTheme();
-    setForceUpdate((prev) => prev + 1); // Force le re-rendu
-  };
+  // Mettre à jour forceUpdate quand le thème change
+  // React.useEffect(() => {
+  //   setForceUpdate((prev) => prev + 1);
+  // }, [theme]);
 
   if (isLoading) {
     return (
       <BackgroundImage
-        key={`bg-loading-${forceUpdate}`}
+        // key={`bg-loading-${forceUpdate}`}
         opacity={0.6}
         blurRadius={2}
       >
@@ -728,27 +727,15 @@ export default function HomeScreen() {
   }
 
   return (
-    <BackgroundImage key={`bg-${forceUpdate}`} opacity={0.6} blurRadius={2}>
+    <BackgroundImage opacity={0.6} blurRadius={2}>
       <ScrollView style={styles.scrollView}>
-        {/* Header avec bouton de thème */}
-        <View style={styles.headerContainer}>
-          <ThemedView style={styles.titleContainer}>
-            <ThemedText type="title">📊 Résumé du Mois</ThemedText>
-          </ThemedView>
-          <TouchableOpacity
-            onPress={handleToggleTheme}
-            style={styles.themeButton}
-          >
-            <Ionicons
-              name={theme === "light" ? "moon" : "sunny"}
-              size={24}
-              color={colors.text}
-            />
-          </TouchableOpacity>
-        </View>
+        {/* Header sans bouton de thème */}
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText type="title">📊 Résumé du Mois</ThemedText>
+        </ThemedView>
 
         {/* Carte des revenus/dépenses avec bouton d'édition */}
-        <IslandCard key={`flux-${forceUpdate}`}>
+        <IslandCard>
           <View style={styles.cardHeader}>
             <Text style={[styles.cardTitle, { color: colors.text }]}>
               Flux mensuel
@@ -819,7 +806,7 @@ export default function HomeScreen() {
           onRequestClose={() => setShowIncomeModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <IslandCard key={`modal-${forceUpdate}`}>
+            <IslandCard>
               <Text style={[styles.modalTitle, { color: colors.text }]}>
                 Modifier les montants
               </Text>
@@ -886,7 +873,7 @@ export default function HomeScreen() {
         </Modal>
 
         {/* Contributions aux projets */}
-        <IslandCard key={`contributions-${forceUpdate}`}>
+        <IslandCard>
           <Text style={[styles.cardTitle, { color: colors.text }]}>
             Contributions mensuelles
           </Text>
@@ -928,7 +915,7 @@ export default function HomeScreen() {
         </IslandCard>
 
         {/* Progression des projets */}
-        <IslandCard key={`progression-${forceUpdate}`}>
+        <IslandCard>
           <Text style={[styles.cardTitle, { color: colors.text }]}>
             Progression des projets
           </Text>
@@ -1012,19 +999,11 @@ const styles = StyleSheet.create({
     left: -35,
     position: "absolute",
   },
-  headerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
   titleContainer: {
     flexDirection: "row",
     gap: 8,
-  },
-  themeButton: {
-    padding: 8,
+    marginBottom: 16,
+    paddingHorizontal: 16,
   },
   loadingContainer: {
     flex: 1,
@@ -1033,12 +1012,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-  },
-  card: {
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
-    backgroundColor: "rgba(255,255,255,0.01)",
   },
   cardHeader: {
     flexDirection: "row",
@@ -1049,10 +1022,6 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: "600",
-  },
-  seeAll: {
-    fontSize: 14,
-    color: COLORS.primary,
   },
   row: {
     flexDirection: "row",
@@ -1153,20 +1122,6 @@ const styles = StyleSheet.create({
   overallValue: {
     fontSize: 18,
     fontWeight: "bold",
-  },
-  quickActions: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 8,
-    marginBottom: 20,
-  },
-  actionButton: {
-    alignItems: "center",
-    padding: 12,
-  },
-  actionText: {
-    fontSize: 12,
-    marginTop: 4,
   },
   // Styles pour le modal
   modalOverlay: {
