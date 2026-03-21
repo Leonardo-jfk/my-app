@@ -767,8 +767,8 @@ export default function ExploreScreen() {
   const theme = (themeContext as any)?.theme ?? "light";
   const imageSource =
     theme === "dark"
-      ? require("../../assets/image/needDark.jpg")
-      : require("../../assets/image/needLight.jpeg");
+      ? require("../../assets/images/NeedDark.jpg")
+      : require("../../assets/images/NeedLight.jpeg");
 
   return (
     <BackgroundImage opacity={0.6} blurRadius={2}>
