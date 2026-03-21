@@ -133,7 +133,10 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 24,
     padding: 20,
+    paddingVertical: 20, // padding vertical
+    paddingHorizontal: 16, // padding horizontal interne
     marginBottom: 16,
+    marginHorizontal: 16,
     borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },

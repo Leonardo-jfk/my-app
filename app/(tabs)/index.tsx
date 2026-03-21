@@ -1003,10 +1003,13 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   titleContainer: {
+    alignItems: "center", // ← Centre verticalement le contenu
+    justifyContent: "center",
     flexDirection: "row",
     gap: 8,
     marginBottom: 16,
     paddingHorizontal: 16,
+    paddingTop: 60,
   },
   loadingContainer: {
     flex: 1,
