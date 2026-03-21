@@ -216,16 +216,6 @@ function TabNavigation() {
         name="index"
         options={{
           title: "Accueil",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
-          ),
-        }}
-      />
-      {/* ... tes autres Tabs.Screen ... */}
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Accueil",
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={24}
@@ -243,7 +233,7 @@ function TabNavigation() {
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={24}
-              name={focused ? "list.bullet" : "list.bullet"}
+              name={focused ? "signature.ja" : "list.bullet"}
               color={color}
             />
           ),
