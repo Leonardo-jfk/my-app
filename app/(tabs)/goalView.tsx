@@ -393,7 +393,7 @@ export default function ExploreScreen() {
               Objectif
             </Text>
             <Text style={[styles.amountValue, { color: colors.text }]}>
-              {formatCurrency(item.targetAmount)} {currency}
+              {formatCurrency(item.targetAmount)}
             </Text>
           </View>
           <View>
@@ -401,7 +401,7 @@ export default function ExploreScreen() {
               Épargné
             </Text>
             <Text style={[styles.amountValue, { color: colors.income }]}>
-              {formatCurrency(item.currentAmount)} {currency}
+              {formatCurrency(item.currentAmount)}
             </Text>
           </View>
           <View>
@@ -409,7 +409,7 @@ export default function ExploreScreen() {
               Reste
             </Text>
             <Text style={[styles.amountValue, { color: colors.warning }]}>
-              {formatCurrency(remaining)} {currency}
+              {formatCurrency(remaining)}
             </Text>
           </View>
         </View>
@@ -771,7 +771,7 @@ export default function ExploreScreen() {
       : require("../../assets/images/NeedLight.jpeg");
 
   return (
-    <BackgroundImage opacity={0.6} blurRadius={2}>
+    <BackgroundImage imageTheme="default" opacity={0.6} blurRadius={2}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.titleContainer}>
           <Text style={[styles.title, { color: colors.text }]}>

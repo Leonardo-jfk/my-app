@@ -40,17 +40,42 @@
 //   },
 // });
 
-// import React from "react";
-import React, { useEffect, useState } from "react";
-import { ImageBackground, StyleSheet, ViewStyle } from "react-native";
-import { useTheme } from "../context/ThemeContext"; // ← Changement ici
+// // import React from "react";
+// import React, { useEffect, useState } from "react";
+// import { ImageBackground, StyleSheet, ViewStyle } from "react-native";
+// import { useTheme } from "../context/ThemeContext"; // ← Changement ici
 
-interface BackgroundImageProps {
-  children: React.ReactNode;
-  style?: ViewStyle;
-  opacity?: number;
-  blurRadius?: number;
-}
+// interface BackgroundImageProps {
+//   children: React.ReactNode;
+//   style?: ViewStyle;
+//   opacity?: number;
+//   blurRadius?: number;
+// }
+
+// // export default function BackgroundImage({
+// //   children,
+// //   style,
+// //   opacity = 0.6,
+// //   blurRadius = 2,
+// // }: BackgroundImageProps) {
+// //   const { theme } = useTheme(); // ← Utilisez useTheme
+
+// //   const backgroundImage =
+// //     theme === "dark"
+// //       ? require("../../assets/images/RichBackDark.jpg")
+// //       : require("../../assets/images/RichBackLight.jpg");
+
+// //   return (
+// //     <ImageBackground
+// //       source={backgroundImage}
+// //       style={[styles.container, style]}
+// //       imageStyle={{ opacity }}
+// //       blurRadius={blurRadius}
+// //     >
+// //       {children}
+// //     </ImageBackground>
+// //   );
+// // }
 
 // export default function BackgroundImage({
 //   children,
@@ -58,16 +83,25 @@ interface BackgroundImageProps {
 //   opacity = 0.6,
 //   blurRadius = 2,
 // }: BackgroundImageProps) {
-//   const { theme } = useTheme(); // ← Utilisez useTheme
-
-//   const backgroundImage =
+//   const { theme } = useTheme();
+//   const [imageSource, setImageSource] = useState(
 //     theme === "dark"
 //       ? require("../../assets/images/RichBackDark.jpg")
-//       : require("../../assets/images/RichBackLight.jpg");
+//       : require("../../assets/images/RichBackLight.jpg"),
+//   );
+
+//   // FORCER le re-rendu quand le thème change
+//   useEffect(() => {
+//     setImageSource(
+//       theme === "dark"
+//         ? require("../../assets/images/RichBackDark.jpg")
+//         : require("../../assets/images/RichBackLight.jpg"),
+//     );
+//   }, [theme]); // ← Dépendance sur theme
 
 //   return (
 //     <ImageBackground
-//       source={backgroundImage}
+//       source={imageSource}
 //       style={[styles.container, style]}
 //       imageStyle={{ opacity }}
 //       blurRadius={blurRadius}
@@ -77,27 +111,79 @@ interface BackgroundImageProps {
 //   );
 // }
 
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//   },
+// });
+
+import React, { useCallback, useEffect, useState } from "react";
+import { ImageBackground, StyleSheet, ViewStyle } from "react-native";
+import { useTheme } from "../context/ThemeContext";
+
+// Définition des thèmes d'images disponibles
+export type ImageTheme =
+  | "default"
+  | "wisdom"
+  | "transactions"
+  | "goals"
+  | "system";
+
+interface BackgroundImageProps {
+  children: React.ReactNode;
+  style?: ViewStyle;
+  opacity?: number;
+  blurRadius?: number;
+  imageTheme?: ImageTheme; // ← Nouvelle prop pour choisir le thème d'image
+}
+
+// Configuration des images par thème et par mode
+const IMAGE_CONFIG = {
+  default: {
+    dark: require("../../assets/images/RichBackDark.jpg"),
+    light: require("../../assets/images/RichBackLight.jpg"),
+  },
+  wisdom: {
+    dark: require("../../assets/images/Mates.jpg"),
+    light: require("../../assets/images/ArgSticker.jpg"),
+  },
+  transactions: {
+    dark: require("../../assets/images/TransactionsDark.jpg"),
+    light: require("../../assets/images/TransactionsLight.jpg"),
+  },
+  goals: {
+    dark: require("../../assets/images/GoalsDark.jpg"),
+    light: require("../../assets/images/GoalsLight.jpg"),
+  },
+  system: {
+    dark: require("../../assets/images/SystemDark.jpg"),
+    light: require("../../assets/images/SystemLight.jpg"),
+  },
+};
+
 export default function BackgroundImage({
   children,
   style,
   opacity = 0.6,
   blurRadius = 2,
+  imageTheme = "default", // ← Par défaut, utilise l'image par défaut
 }: BackgroundImageProps) {
   const { theme } = useTheme();
-  const [imageSource, setImageSource] = useState(
-    theme === "dark"
-      ? require("../../assets/images/RichBackDark.jpg")
-      : require("../../assets/images/RichBackLight.jpg"),
-  );
 
-  // FORCER le re-rendu quand le thème change
+  // const getImageSource = () => {
+  //   const config = IMAGE_CONFIG[imageTheme];
+  //   return theme === "dark" ? config.dark : config.light;
+  // };
+  const getImageSource = useCallback(() => {
+    const config = IMAGE_CONFIG[imageTheme];
+    return theme === "dark" ? config.dark : config.light;
+  }, [theme, imageTheme]);
+
+  const [imageSource, setImageSource] = useState(getImageSource());
+
   useEffect(() => {
-    setImageSource(
-      theme === "dark"
-        ? require("../../assets/images/RichBackDark.jpg")
-        : require("../../assets/images/RichBackLight.jpg"),
-    );
-  }, [theme]); // ← Dépendance sur theme
+    setImageSource(getImageSource());
+  }, [getImageSource]);
 
   return (
     <ImageBackground

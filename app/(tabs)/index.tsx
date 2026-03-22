@@ -706,7 +706,7 @@ export default function HomeScreen() {
     setShowIncomeModal(false);
   };
 
-  const { formatCurrency, currency } = useCurrency();
+  const { formatCurrency } = useCurrency();
 
   // Mettre à jour forceUpdate quand le thème change
   React.useEffect(() => {
@@ -730,7 +730,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <BackgroundImage opacity={0.6} blurRadius={2}>
+    <BackgroundImage imageTheme="default" opacity={0.6} blurRadius={2}>
       <ScrollView style={styles.scrollView}>
         {/* Header sans bouton de thème */}
         <View style={styles.titleContainer}>
