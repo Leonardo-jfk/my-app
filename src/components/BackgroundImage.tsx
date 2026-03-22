@@ -148,16 +148,16 @@ const IMAGE_CONFIG = {
     light: require("../../assets/images/ArgSticker.jpg"),
   },
   transactions: {
-    dark: require("../../assets/images/TransactionsDark.jpg"),
-    light: require("../../assets/images/TransactionsLight.jpg"),
+    dark: require("../../assets/images/100FR.jpg"),
+    light: require("../../assets/images/50FR.jpg"),
   },
   goals: {
-    dark: require("../../assets/images/GoalsDark.jpg"),
-    light: require("../../assets/images/GoalsLight.jpg"),
+    dark: require("../../assets/images/RichBackDark.jpg"),
+    light: require("../../assets/images/RichBackLight.jpg"),
   },
   system: {
-    dark: require("../../assets/images/SystemDark.jpg"),
-    light: require("../../assets/images/SystemLight.jpg"),
+    dark: require("../../assets/images/100FR.jpg"),
+    light: require("../../assets/images/10FR.jpg"),
   },
 };
 
