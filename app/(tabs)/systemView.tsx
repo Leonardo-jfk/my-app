@@ -77,7 +77,6 @@ export default function SystemView() {
   return (
     <BackgroundImage imageTheme="default" opacity={0.9} blurRadius={2}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Apparence */}
         <IslandCard>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
             <Ionicons name="color-palette" size={20} color={colors.text} />{" "}
@@ -384,7 +383,6 @@ export default function SystemView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
   loadingContainer: {
     flex: 1,

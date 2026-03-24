@@ -1,8 +1,28 @@
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Tabs } from "expo-router";
-import React from "react";
 import { ThemeProvider, useTheme } from "../../src/context/ThemeContext"; // Importe useTheme
+
+import { Parisienne_400Regular, useFonts } from "@expo-google-fonts/parisienne";
+import * as SplashScreen from "expo-splash-screen";
+import React, { useEffect } from "react";
+
+// export default function RootLayout() {
+//   const [loaded] = useFonts({
+//     'FrenchScript': Parisienne_400Regular,
+//     'FrenchScriptBold': Parisienne_700Bold,
+//   });
+
+//   useEffect(() => {
+//     if (loaded) {
+//       SplashScreen.hideAsync();
+//     }
+//   }, [loaded]);
+
+//   if (!loaded) return null;
+
+//   return <Stack />; // Ton contenu habituel
+// }
 
 function TabNavigation() {
   const { colors, theme } = useTheme(); // Récupère les couleurs dynamiques
@@ -99,7 +119,31 @@ function TabNavigation() {
   );
 }
 
+// export default function TabLayout() {
+//   return (
+//     <ThemeProvider>
+//       <TabNavigation />
+//     </ThemeProvider>
+//   );
+// }
+
 export default function TabLayout() {
+  // Chargement des polices manuscrites
+  const [loaded, error] = useFonts({
+    FrenchScript: Parisienne_400Regular,
+  });
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  // Si les polices ne sont pas chargées, on n'affiche rien (ou un écran de chargement)
+  if (!loaded && !error) {
+    return null;
+  }
+
   return (
     <ThemeProvider>
       <TabNavigation />

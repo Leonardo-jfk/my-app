@@ -302,7 +302,14 @@ export default function WisdomView() {
       >
         {/* Header */}
         <View style={styles.titleContainer}>
-          <Text style={[styles.title, { color: colors.text }]}>
+          <Text
+            style={{
+              fontFamily: "FrenchScript",
+              fontSize: 28,
+              color: colors.text,
+              textAlign: "center",
+            }}
+          >
             💡 Sagesse Financière
           </Text>
         </View>
