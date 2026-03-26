@@ -184,7 +184,7 @@ export default function HomeScreen() {
           <View style={styles.savingsContainer}>
             <Text style={[styles.savingsLabel, { color: colors.text }]}>
               Économies du mois
-            </Text>{" "}
+            </Text>
             <Text
               style={[
                 styles.savingsValue,

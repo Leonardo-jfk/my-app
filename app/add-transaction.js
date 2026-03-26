@@ -72,8 +72,6 @@ export default function AddTransactionScreen() {
         <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>transacBacck</Text>
-        <View style={{ width: 20 }} /> {/* Espace pour équilibrer */}
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
