@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
+  Alert,
   Modal,
   ScrollView,
   StyleSheet,
@@ -21,7 +22,9 @@ import { Dream, Goal, STORAGE_KEYS } from "../../src/types/finance-types";
 // import { formatCurrency } from "../../src/utils/formatters";
 import { useCurrency } from "../../src/context/CurrencyContext";
 
-// Types
+// Dans index.tsx, ajoutez après les imports :
+import { useDailyBudget } from "../../src/hooks/useDailyBudget";
+// / Types
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -77,6 +80,28 @@ export default function HomeScreen() {
     (sum, g) => sum + (g.currentAmount || 0),
     0,
   );
+
+  // Dans le composant, après les stats :
+  const {
+    dailyBudget,
+    remainingMonthlyBudget,
+    remainingDays,
+    credits,
+    totalMonthlyCreditPayments,
+    addCredit,
+    payCredit,
+    deleteCredit,
+  } = useDailyBudget(monthlyIncome, monthlyExpenses, dreams, goals);
+
+  // Ajoutez un état pour le modal des crédits
+  const [showCreditModal, setShowCreditModal] = useState(false);
+  const [newCredit, setNewCredit] = useState({
+    title: "",
+    totalAmount: "",
+    remainingMonths: "12",
+    monthlyPayment: "",
+    description: "",
+  });
 
   // Fonctions pour modifier les revenus/dépenses
   const handleSaveIncome = () => {
@@ -177,6 +202,224 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* Modal pour gérer les crédits */}
+          <Modal
+            visible={showCreditModal}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setShowCreditModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <ScrollView
+                style={[
+                  styles.creditModalContainer,
+                  { backgroundColor: colors.background },
+                ]}
+              >
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, { color: colors.text }]}>
+                    Gérer mes crédits
+                  </Text>
+                  <TouchableOpacity onPress={() => setShowCreditModal(false)}>
+                    <Ionicons name="close" size={24} color={colors.text} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Ajouter un crédit */}
+                <Text style={[styles.modalLabel, { color: colors.text }]}>
+                  Nouveau crédit
+                </Text>
+                <TextInput
+                  style={[
+                    styles.modalInput,
+                    { color: colors.text, borderColor: colors.icon + "30" },
+                  ]}
+                  placeholder="Nom (ex: Vélo)"
+                  value={newCredit.title}
+                  onChangeText={(text) =>
+                    setNewCredit({ ...newCredit, title: text })
+                  }
+                  placeholderTextColor={colors.textLight}
+                />
+                <TextInput
+                  style={[
+                    styles.modalInput,
+                    { color: colors.text, borderColor: colors.icon + "30" },
+                  ]}
+                  placeholder="Montant total (€)"
+                  value={newCredit.totalAmount}
+                  onChangeText={(text) => {
+                    setNewCredit({ ...newCredit, totalAmount: text });
+                    // Calculer automatiquement la mensualité
+                    const total = parseFloat(text);
+                    const months = parseFloat(newCredit.remainingMonths);
+                    if (!isNaN(total) && !isNaN(months) && months > 0) {
+                      setNewCredit({
+                        ...newCredit,
+                        monthlyPayment: (total / months).toFixed(2),
+                      });
+                    }
+                  }}
+                  keyboardType="numeric"
+                  placeholderTextColor={colors.textLight}
+                />
+                <TextInput
+                  style={[
+                    styles.modalInput,
+                    { color: colors.text, borderColor: colors.icon + "30" },
+                  ]}
+                  placeholder="Nombre de mois"
+                  value={newCredit.remainingMonths}
+                  onChangeText={(text) => {
+                    setNewCredit({ ...newCredit, remainingMonths: text });
+                    const total = parseFloat(newCredit.totalAmount);
+                    const months = parseFloat(text);
+                    if (!isNaN(total) && !isNaN(months) && months > 0) {
+                      setNewCredit({
+                        ...newCredit,
+                        monthlyPayment: (total / months).toFixed(2),
+                      });
+                    }
+                  }}
+                  keyboardType="numeric"
+                  placeholderTextColor={colors.textLight}
+                />
+                <Text
+                  style={[
+                    styles.monthlyPaymentPreview,
+                    { color: colors.primary },
+                  ]}
+                >
+                  Mensualité:{" "}
+                  {formatCurrency(parseFloat(newCredit.monthlyPayment) || 0)}
+                </Text>
+                <TextInput
+                  style={[
+                    styles.modalInput,
+                    { color: colors.text, borderColor: colors.icon + "30" },
+                  ]}
+                  placeholder="Description (optionnel)"
+                  value={newCredit.description}
+                  onChangeText={(text) =>
+                    setNewCredit({ ...newCredit, description: text })
+                  }
+                  placeholderTextColor={colors.textLight}
+                />
+
+                <TouchableOpacity
+                  style={[
+                    styles.saveButton,
+                    { backgroundColor: colors.primary, marginBottom: 16 },
+                  ]}
+                  onPress={() => {
+                    if (!newCredit.title || !newCredit.totalAmount) {
+                      Alert.alert("Erreur", "Veuillez remplir tous les champs");
+                      return;
+                    }
+                    addCredit({
+                      title: newCredit.title,
+                      totalAmount: parseFloat(newCredit.totalAmount),
+                      remainingMonths: parseInt(newCredit.remainingMonths),
+                      monthlyPayment: parseFloat(newCredit.monthlyPayment),
+                      startDate: new Date().toISOString(),
+                      description: newCredit.description,
+                    });
+                    setNewCredit({
+                      title: "",
+                      totalAmount: "",
+                      remainingMonths: "12",
+                      monthlyPayment: "",
+                      description: "",
+                    });
+                  }}
+                >
+                  <Text style={{ color: "white", fontWeight: "600" }}>
+                    Ajouter un crédit
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Liste des crédits existants */}
+                <Text
+                  style={[
+                    styles.modalLabel,
+                    { color: colors.text, marginTop: 16 },
+                  ]}
+                >
+                  Mes crédits en cours
+                </Text>
+                {credits.map((credit) => {
+                  const remaining = credit.totalAmount - credit.paidAmount;
+                  const progress =
+                    (credit.paidAmount / credit.totalAmount) * 100;
+                  return (
+                    <View key={credit.id} style={styles.creditItem}>
+                      <View style={styles.creditHeader}>
+                        <Text
+                          style={[styles.creditTitle, { color: colors.text }]}
+                        >
+                          {credit.title}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => deleteCredit(credit.id)}
+                        >
+                          <Ionicons
+                            name="trash-outline"
+                            size={18}
+                            color={colors.danger}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                      <Text
+                        style={[
+                          styles.creditDescription,
+                          { color: colors.textLight },
+                        ]}
+                      >
+                        {credit.description}
+                      </Text>
+                      <View style={styles.creditProgressContainer}>
+                        <View style={styles.creditProgressBar}>
+                          <View
+                            style={[
+                              styles.creditProgressFill,
+                              {
+                                width: `${progress}%`,
+                                backgroundColor: colors.primary,
+                              },
+                            ]}
+                          />
+                        </View>
+                        <Text
+                          style={[
+                            styles.creditProgressText,
+                            { color: colors.textLight },
+                          ]}
+                        >
+                          {progress.toFixed(0)}%
+                        </Text>
+                      </View>
+                      <View style={styles.creditDetails}>
+                        <Text
+                          style={[styles.creditAmount, { color: colors.text }]}
+                        >
+                          Reste: {formatCurrency(remaining)}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.creditMonthly,
+                            { color: colors.primary },
+                          ]}
+                        >
+                          {formatCurrency(credit.monthlyPayment)}/mois
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </Modal>
+
           <View
             style={[styles.divider, { backgroundColor: colors.icon + "20" }]}
           />
@@ -202,77 +445,276 @@ export default function HomeScreen() {
           </View>
         </IslandCard>
 
-        {/* Modal pour modifier les revenus/dépenses */}
+        {/* Carte du budget journalier */}
+        <IslandCard>
+          <View style={styles.cardHeader}>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>
+              Budget journalier
+            </Text>
+          </View>
+
+          <View style={styles.dailyBudgetContainer}>
+            <Text style={[styles.dailyBudgetValue, { color: colors.primary }]}>
+              {formatCurrency(dailyBudget)}
+            </Text>
+            <Text
+              style={[styles.dailyBudgetLabel, { color: colors.textLight }]}
+            >
+              par jour ({remainingDays} jours restants)
+            </Text>
+          </View>
+
+          <View style={styles.remainingBudgetContainer}>
+            <Text
+              style={[styles.remainingBudgetLabel, { color: colors.textLight }]}
+            >
+              Budget restant du mois
+            </Text>
+            <Text
+              style={[styles.remainingBudgetValue, { color: colors.success }]}
+            >
+              {formatCurrency(remainingMonthlyBudget)}
+            </Text>
+          </View>
+
+          {totalMonthlyCreditPayments > 0 && (
+            <View style={styles.creditPaymentContainer}>
+              <Text
+                style={[styles.creditPaymentLabel, { color: colors.textLight }]}
+              >
+                Mensualités crédits
+              </Text>
+              <Text
+                style={[styles.creditPaymentValue, { color: colors.warning }]}
+              >
+                {formatCurrency(totalMonthlyCreditPayments)}
+              </Text>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={styles.creditButton}
+            onPress={() => setShowCreditModal(true)}
+          >
+            <Ionicons name="card-outline" size={20} color={colors.primary} />
+            <Text style={[styles.creditButtonText, { color: colors.primary }]}>
+              Gérer mes crédits
+            </Text>
+          </TouchableOpacity>
+        </IslandCard>
+
+        {/* Modal pour gérer les crédits */}
         <Modal
-          visible={showIncomeModal}
+          visible={showCreditModal}
           transparent
           animationType="slide"
-          onRequestClose={() => setShowIncomeModal(false)}
+          onRequestClose={() => setShowCreditModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <IslandCard>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
-                Modifier les montants
-              </Text>
-
-              <Text style={[styles.modalLabel, { color: colors.text }]}>
-                Revenus mensuels
-              </Text>
-              <TextInput
-                style={[
-                  styles.modalInput,
-                  { color: colors.text, borderColor: colors.icon + "30" },
-                ]}
-                value={tempIncome}
-                onChangeText={setTempIncome}
-                keyboardType="numeric"
-                placeholder="Montant"
-                placeholderTextColor={colors.text}
-              />
-
-              <Text style={[styles.modalLabel, { color: colors.text }]}>
-                Dépenses mensuelles
-              </Text>
-              <TextInput
-                style={[
-                  styles.modalInput,
-                  { color: colors.text, borderColor: colors.icon + "30" },
-                ]}
-                value={tempExpenses}
-                onChangeText={setTempExpenses}
-                keyboardType="numeric"
-                placeholder="Montant"
-                placeholderTextColor={colors.text}
-              />
-
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={[
-                    styles.modalButton,
-                    styles.modalCancel,
-                    { backgroundColor: colors.icon + "20" },
-                  ]}
-                  onPress={() => setShowIncomeModal(false)}
-                >
-                  <Text
-                    style={[styles.modalButtonText, { color: colors.text }]}
-                  >
-                    Annuler
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.modalSave]}
-                  onPress={() => {
-                    handleSaveIncome();
-                    handleSaveExpenses();
-                  }}
-                >
-                  <Text style={[styles.modalButtonText, { color: "white" }]}>
-                    Enregistrer
-                  </Text>
+            <ScrollView
+              style={[
+                styles.creditModalContainer,
+                { backgroundColor: colors.background },
+              ]}
+            >
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  Gérer mes crédits
+                </Text>
+                <TouchableOpacity onPress={() => setShowCreditModal(false)}>
+                  <Ionicons name="close" size={24} color={colors.text} />
                 </TouchableOpacity>
               </View>
-            </IslandCard>
+
+              {/* Ajouter un crédit */}
+              <Text style={[styles.modalLabel, { color: colors.text }]}>
+                Nouveau crédit
+              </Text>
+              <TextInput
+                style={[
+                  styles.modalInput,
+                  { color: colors.text, borderColor: colors.icon + "30" },
+                ]}
+                placeholder="Nom (ex: Vélo)"
+                value={newCredit.title}
+                onChangeText={(text) =>
+                  setNewCredit({ ...newCredit, title: text })
+                }
+                placeholderTextColor={colors.textLight}
+              />
+              <TextInput
+                style={[
+                  styles.modalInput,
+                  { color: colors.text, borderColor: colors.icon + "30" },
+                ]}
+                placeholder="Montant total (€)"
+                value={newCredit.totalAmount}
+                onChangeText={(text) => {
+                  setNewCredit({ ...newCredit, totalAmount: text });
+                  // Calculer automatiquement la mensualité
+                  const total = parseFloat(text);
+                  const months = parseFloat(newCredit.remainingMonths);
+                  if (!isNaN(total) && !isNaN(months) && months > 0) {
+                    setNewCredit({
+                      ...newCredit,
+                      monthlyPayment: (total / months).toFixed(2),
+                    });
+                  }
+                }}
+                keyboardType="numeric"
+                placeholderTextColor={colors.textLight}
+              />
+              <TextInput
+                style={[
+                  styles.modalInput,
+                  { color: colors.text, borderColor: colors.icon + "30" },
+                ]}
+                placeholder="Nombre de mois"
+                value={newCredit.remainingMonths}
+                onChangeText={(text) => {
+                  setNewCredit({ ...newCredit, remainingMonths: text });
+                  const total = parseFloat(newCredit.totalAmount);
+                  const months = parseFloat(text);
+                  if (!isNaN(total) && !isNaN(months) && months > 0) {
+                    setNewCredit({
+                      ...newCredit,
+                      monthlyPayment: (total / months).toFixed(2),
+                    });
+                  }
+                }}
+                keyboardType="numeric"
+                placeholderTextColor={colors.textLight}
+              />
+              <Text
+                style={[
+                  styles.monthlyPaymentPreview,
+                  { color: colors.primary },
+                ]}
+              >
+                Mensualité:{" "}
+                {formatCurrency(parseFloat(newCredit.monthlyPayment) || 0)}
+              </Text>
+              <TextInput
+                style={[
+                  styles.modalInput,
+                  { color: colors.text, borderColor: colors.icon + "30" },
+                ]}
+                placeholder="Description (optionnel)"
+                value={newCredit.description}
+                onChangeText={(text) =>
+                  setNewCredit({ ...newCredit, description: text })
+                }
+                placeholderTextColor={colors.textLight}
+              />
+
+              <TouchableOpacity
+                style={[
+                  styles.saveButton,
+                  { backgroundColor: colors.primary, marginBottom: 16 },
+                ]}
+                onPress={() => {
+                  if (!newCredit.title || !newCredit.totalAmount) {
+                    Alert.alert("Erreur", "Veuillez remplir tous les champs");
+                    return;
+                  }
+                  addCredit({
+                    title: newCredit.title,
+                    totalAmount: parseFloat(newCredit.totalAmount),
+                    remainingMonths: parseInt(newCredit.remainingMonths),
+                    monthlyPayment: parseFloat(newCredit.monthlyPayment),
+                    startDate: new Date().toISOString(),
+                    description: newCredit.description,
+                  });
+                  setNewCredit({
+                    title: "",
+                    totalAmount: "",
+                    remainingMonths: "12",
+                    monthlyPayment: "",
+                    description: "",
+                  });
+                }}
+              >
+                <Text style={{ color: "white", fontWeight: "600" }}>
+                  Ajouter un crédit
+                </Text>
+              </TouchableOpacity>
+
+              {/* Liste des crédits existants */}
+              <Text
+                style={[
+                  styles.modalLabel,
+                  { color: colors.text, marginTop: 16 },
+                ]}
+              >
+                Mes crédits en cours
+              </Text>
+              {credits.map((credit) => {
+                const remaining = credit.totalAmount - credit.paidAmount;
+                const progress = (credit.paidAmount / credit.totalAmount) * 100;
+                return (
+                  <View key={credit.id} style={styles.creditItem}>
+                    <View style={styles.creditHeader}>
+                      <Text
+                        style={[styles.creditTitle, { color: colors.text }]}
+                      >
+                        {credit.title}
+                      </Text>
+                      <TouchableOpacity onPress={() => deleteCredit(credit.id)}>
+                        <Ionicons
+                          name="trash-outline"
+                          size={18}
+                          color={colors.danger}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <Text
+                      style={[
+                        styles.creditDescription,
+                        { color: colors.textLight },
+                      ]}
+                    >
+                      {credit.description}
+                    </Text>
+                    <View style={styles.creditProgressContainer}>
+                      <View style={styles.creditProgressBar}>
+                        <View
+                          style={[
+                            styles.creditProgressFill,
+                            {
+                              width: `${progress}%`,
+                              backgroundColor: colors.primary,
+                            },
+                          ]}
+                        />
+                      </View>
+                      <Text
+                        style={[
+                          styles.creditProgressText,
+                          { color: colors.textLight },
+                        ]}
+                      >
+                        {progress.toFixed(0)}%
+                      </Text>
+                    </View>
+                    <View style={styles.creditDetails}>
+                      <Text
+                        style={[styles.creditAmount, { color: colors.text }]}
+                      >
+                        Reste: {formatCurrency(remaining)}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.creditMonthly,
+                          { color: colors.primary },
+                        ]}
+                      >
+                        {formatCurrency(credit.monthlyPayment)}/mois
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </ScrollView>
           </View>
         </Modal>
 
@@ -583,5 +1025,127 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+
+  // Ajoutez dans StyleSheet :
+  dailyBudgetContainer: {
+    alignItems: "center",
+    marginVertical: 16,
+  },
+  dailyBudgetValue: {
+    fontSize: 48,
+    fontWeight: "bold",
+  },
+  dailyBudgetLabel: {
+    fontSize: 14,
+    marginTop: 4,
+  },
+  remainingBudgetContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.1)",
+  },
+  remainingBudgetLabel: {
+    fontSize: 14,
+  },
+  remainingBudgetValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  creditPaymentContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.05)",
+  },
+  creditPaymentLabel: {
+    fontSize: 13,
+  },
+  creditPaymentValue: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  creditButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: "rgba(99,102,241,0.1)",
+  },
+  creditButtonText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+
+  // Dans StyleSheet
+  creditModalContainer: {
+    maxHeight: "90%",
+    margin: 20,
+    borderRadius: 20,
+    padding: 20,
+  },
+  creditItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.1)",
+  },
+  creditHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  creditTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  creditDescription: {
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  creditProgressContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 8,
+  },
+  creditProgressBar: {
+    flex: 1,
+    height: 6,
+    backgroundColor: "rgba(0,0,0,0.1)",
+    borderRadius: 3,
+    marginRight: 8,
+  },
+  creditProgressFill: {
+    height: 6,
+    borderRadius: 3,
+  },
+  creditProgressText: {
+    fontSize: 12,
+  },
+  creditDetails: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 4,
+  },
+  creditAmount: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  creditMonthly: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  monthlyPaymentPreview: {
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: "right",
   },
 });
