@@ -313,10 +313,12 @@ export default function WisdomView() {
             Sagesse Financière
           </Text>
         </View>
-        <Text style={[styles.headerSubtitle, { color: colors.textLight }]}>
-          La vraie richesse ne est pas de dépenser des millions, mais de vivre
-          heureux avec 5 à 10 % de ses revenus.
-        </Text>
+        <IslandCard>
+          <Text style={[styles.headerSubtitle, { color: colors.textLight }]}>
+            La vraie richesse ne est pas de dépenser des millions, mais de vivre
+            heureux avec 5 à 10 % de ses revenus.
+          </Text>
+        </IslandCard>
 
         {/* Conseils par situation */}
         <View style={styles.sectionHeader}>
@@ -467,32 +469,34 @@ export default function WisdomView() {
         </ScrollView>
 
         {/* Tags */}
-        <View style={styles.tagsContainer}>
-          {TAGS.map((tag) => (
-            <TouchableOpacity
-              key={tag}
-              style={[
-                styles.tagChip,
-                selectedTag === tag && {
-                  backgroundColor: colors.primary + "20",
-                },
-              ]}
-              onPress={() => setSelectedTag(selectedTag === tag ? null : tag)}
-            >
-              <Text
+        <IslandCard>
+          <View style={styles.tagsContainer}>
+            {TAGS.map((tag) => (
+              <TouchableOpacity
+                key={tag}
                 style={[
-                  styles.tagText,
-                  {
-                    color:
-                      selectedTag === tag ? colors.primary : colors.textLight,
+                  styles.tagChip,
+                  selectedTag === tag && {
+                    backgroundColor: colors.primary + "20",
                   },
                 ]}
+                onPress={() => setSelectedTag(selectedTag === tag ? null : tag)}
               >
-                #{tag}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+                <Text
+                  style={[
+                    styles.tagText,
+                    {
+                      color:
+                        selectedTag === tag ? colors.primary : colors.textLight,
+                    },
+                  ]}
+                >
+                  #{tag}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </IslandCard>
 
         {/* Liste des citations */}
         {filteredQuotes.map((item) => (
@@ -621,4 +625,9 @@ const styles = StyleSheet.create({
   quoteTagText: { fontSize: 10 },
   emptyCard: { padding: 40, alignItems: "center" },
   emptyText: { fontSize: 16 },
+
+  tagIslandCard: {
+    borderRadius: 10, // ← Bord arrondi pour les tags
+    overflow: "hidden",
+  },
 });

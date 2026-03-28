@@ -79,43 +79,90 @@
 //   },
 // });
 
-// import React, { useEffect, useState } from "react"; // ← Ajouter useEffect, useState
+// // import React, { useEffect, useState } from "react"; // ← Ajouter useEffect, useState
+// import { StyleSheet, View, ViewStyle } from "react-native";
+// import { useTheme } from "../context/ThemeContext";
+
+// interface IslandCardProps {
+//   children: React.ReactNode;
+//   style?: ViewStyle;
+// }
+
+// // export default function IslandCard({ children, style }: IslandCardProps) {
+// //   const { theme } = useTheme();
+
+// //   // Utiliser useState pour forcer le re-rendu
+// //   const [cardStyle, setCardStyle] = useState({
+// //     backgroundColor:
+// //       theme === "dark" ? "rgba(0, 0, 0, 0.7)" : "rgba(255, 255, 255, 0.4)",
+// //     borderColor:
+// //       theme === "dark" ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.8)",
+// //   });
+
+// //   // Mettre à jour le style quand le thème change
+// //   useEffect(() => {
+// //     setCardStyle({
+// //       backgroundColor:
+// //         theme === "dark" ? "rgba(0, 0, 0, 0.7)" : "rgba(255, 255, 255, 0.4)",
+// //       borderColor:
+// //         theme === "dark" ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.8)",
+// //     });
+// //   }, [theme]);
+
+// //   return <View style={[styles.card, cardStyle, style]}>{children}</View>;
+// // }
+
+// export default function IslandCard({ children, style }: IslandCardProps) {
+//   const { theme } = useTheme();
+
+//   // On calcule les couleurs à chaque rendu, c'est très rapide
+//   const backgroundColor =
+//     theme === "dark" ? "rgba(0, 0, 0, 0.7)" : "rgba(255, 255, 255, 0.4)";
+
+//   const borderColor =
+//     theme === "dark" ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.8)";
+
+//   return (
+//     <View style={[styles.card, { backgroundColor, borderColor }, style]}>
+//       {children}
+//     </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   card: {
+//     borderRadius: 24,
+//     padding: 20,
+//     paddingVertical: 20, // padding vertical
+//     paddingHorizontal: 16, // padding horizontal interne
+//     marginBottom: 16,
+//     marginHorizontal: 16,
+//     borderWidth: 1,
+//     shadowColor: "#000",
+//     shadowOffset: { width: 0, height: 10 },
+//     shadowOpacity: 0.3,
+//     shadowRadius: 20,
+//     elevation: 5,
+//   },
+// });
+
+// IslandCard.tsx
 import { StyleSheet, View, ViewStyle } from "react-native";
 import { useTheme } from "../context/ThemeContext";
 
 interface IslandCardProps {
   children: React.ReactNode;
   style?: ViewStyle;
+  noPadding?: boolean; // ← Ajouter cette prop
 }
 
-// export default function IslandCard({ children, style }: IslandCardProps) {
-//   const { theme } = useTheme();
-
-//   // Utiliser useState pour forcer le re-rendu
-//   const [cardStyle, setCardStyle] = useState({
-//     backgroundColor:
-//       theme === "dark" ? "rgba(0, 0, 0, 0.7)" : "rgba(255, 255, 255, 0.4)",
-//     borderColor:
-//       theme === "dark" ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.8)",
-//   });
-
-//   // Mettre à jour le style quand le thème change
-//   useEffect(() => {
-//     setCardStyle({
-//       backgroundColor:
-//         theme === "dark" ? "rgba(0, 0, 0, 0.7)" : "rgba(255, 255, 255, 0.4)",
-//       borderColor:
-//         theme === "dark" ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.8)",
-//     });
-//   }, [theme]);
-
-//   return <View style={[styles.card, cardStyle, style]}>{children}</View>;
-// }
-
-export default function IslandCard({ children, style }: IslandCardProps) {
+export default function IslandCard({
+  children,
+  style,
+  noPadding = false,
+}: IslandCardProps) {
   const { theme } = useTheme();
 
-  // On calcule les couleurs à chaque rendu, c'est très rapide
   const backgroundColor =
     theme === "dark" ? "rgba(0, 0, 0, 0.7)" : "rgba(255, 255, 255, 0.4)";
 
@@ -123,7 +170,14 @@ export default function IslandCard({ children, style }: IslandCardProps) {
     theme === "dark" ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.8)";
 
   return (
-    <View style={[styles.card, { backgroundColor, borderColor }, style]}>
+    <View
+      style={[
+        styles.card,
+        noPadding && styles.noPadding, // ← Si noPadding, appliquer un style sans padding
+        { backgroundColor, borderColor },
+        style,
+      ]}
+    >
       {children}
     </View>
   );
@@ -133,8 +187,8 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 24,
     padding: 20,
-    paddingVertical: 20, // padding vertical
-    paddingHorizontal: 16, // padding horizontal interne
+    paddingVertical: 20,
+    paddingHorizontal: 16,
     marginBottom: 16,
     marginHorizontal: 16,
     borderWidth: 1,
@@ -143,5 +197,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 20,
     elevation: 5,
+  },
+  noPadding: {
+    padding: 0, // ← Pas de padding
+    paddingVertical: 0,
+    paddingHorizontal: 0,
   },
 });
