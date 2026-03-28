@@ -44,6 +44,9 @@ export default function HomeScreen() {
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [tempIncome, setTempIncome] = useState("2500");
   const [tempExpenses, setTempExpenses] = useState("1800");
+  const [newCreditAmount, setNewCreditAmount] = useState("");
+  const [newCreditTitle, setNewCreditTitle] = useState("");
+  const [newCreditMonths, setNewCreditMonths] = useState("12");
 
   // Charger toutes les données
   const loadAllData = async () => {
@@ -121,6 +124,24 @@ export default function HomeScreen() {
   };
 
   const { formatCurrency } = useCurrency();
+
+  const handleAddCredit = () => {
+    if (!newCreditAmount || !newCreditTitle) return;
+
+    addCredit({
+      title: newCreditTitle,
+      totalAmount: parseFloat(newCreditAmount),
+      remainingMonths: parseInt(newCreditMonths),
+      monthlyPayment: parseFloat(newCreditAmount) / parseInt(newCreditMonths),
+      startDate: new Date().toISOString(),
+      description: "Achat exceptionnel à amortir",
+    });
+
+    // Reset
+    setNewCreditAmount("");
+    setNewCreditTitle("");
+    setShowCreditModal(false);
+  };
 
   // Mettre à jour forceUpdate quand le thème change
   React.useEffect(() => {
@@ -976,6 +997,25 @@ export default function HomeScreen() {
                   }
                   placeholderTextColor={colors.textLight}
                 />
+                <Text style={[styles.modalLabel, { color: colors.text }]}>
+                  Montant total
+                </Text>
+                <TextInput
+                  style={[
+                    styles.modalInput,
+                    {
+                      color: colors.text,
+                      borderColor: colors.icon + "30",
+                      borderWidth: 1,
+                    },
+                  ]}
+                  placeholder="Ex: 500"
+                  placeholderTextColor={colors.textLight}
+                  keyboardType="numeric"
+                  value={newCreditAmount}
+                  onChangeText={(text) => setNewCreditAmount(text)} // Assure-toi que c'est bien setNewCreditAmount
+                />
+
                 <TextInput
                   style={[
                     styles.modalInput,
