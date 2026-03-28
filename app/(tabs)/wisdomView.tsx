@@ -313,7 +313,9 @@ export default function WisdomView() {
             Sagesse Financière
           </Text>
         </View>
-        <IslandCard>
+        {/* <IslandCard noPadding > */}
+        {/* <IslandCard compact style={styles.tagsCard}> */}
+        <IslandCard paddingBottom={2}>
           <Text style={[styles.headerSubtitle, { color: colors.textLight }]}>
             La vraie richesse ne est pas de dépenser des millions, mais de vivre
             heureux avec 5 à 10 % de ses revenus.
@@ -538,7 +540,7 @@ export default function WisdomView() {
         ))}
 
         {filteredQuotes.length === 0 && (
-          <IslandCard style={styles.emptyCard}>
+          <IslandCard noPadding style={styles.tagIslandCard}>
             <Text style={[styles.emptyText, { color: colors.textLight }]}>
               Aucune citation trouvée
             </Text>
@@ -629,5 +631,10 @@ const styles = StyleSheet.create({
   tagIslandCard: {
     borderRadius: 10, // ← Bord arrondi pour les tags
     overflow: "hidden",
+  },
+
+  tagsCard: {
+    paddingVertical: 1, // ← Réduit l'espace interne haut/bas
+    paddingHorizontal: 12, // ← Peut aussi réduire l'espace latéral
   },
 });
